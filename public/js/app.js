@@ -10,65 +10,59 @@ async function refreshSites() {
 
         if (sites.length === 0) {
             container.innerHTML = `
-                <div class="col-12 text-center py-5">
-                    <i class="bi bi-inbox display-1 text-muted"></i>
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox display-4 text-muted"></i>
                     <p class="mt-3">Нет сайтов для мониторинга</p>
                     <a href="/add" class="btn btn-primary">Добавить первый сайт</a>
                 </div>`;
             return;
         }
 
-        container.innerHTML = sites.map(site => renderSiteCard(site)).join("");
-        document.getElementById("last-update").textContent = 
-            "Обновлено: " + new Date().toLocaleTimeString("ru-RU");
+        container.innerHTML = sites.map(site => renderSiteItem(site)).join("");
+        const lastUpdate = document.getElementById("last-update");
+        if (lastUpdate) {
+            lastUpdate.textContent = "Обновлено: " + new Date().toLocaleTimeString("ru-RU");
+        }
     } catch (e) {
-        container.innerHTML = `<div class="col-12 alert alert-danger">Ошибка загрузки: ${e.message}</div>`;
+        container.innerHTML = `<div class="alert alert-danger">Ошибка загрузки: ${e.message}</div>`;
     }
 }
 
-function renderSiteCard(site) {
+function renderSiteItem(site) {
     const isUp = site.is_up === true;
-    const statusClass = site.last_status == null ? "status-unknown" : (isUp ? "status-up" : "status-down");
-    const statusText = site.last_status == null ? "Не проверен" : (isUp ? "UP" : "DOWN");
+    const statusClass = site.last_status == null ? "unknown" : (isUp ? "up" : "down");
     const statusCode = site.last_status ?? "—";
     const rt = site.last_response_time ? `${site.last_response_time} мс` : "—";
     const checked = site.last_checked 
         ? new Date(site.last_checked).toLocaleString("ru-RU") 
-        : "Никогда";
+        : "Не проверялся";
 
     return `
-    <div class="col-md-6 col-lg-4">
-        <div class="card site-card h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h5 class="card-title mb-0">${escapeHtml(site.name)}</h5>
-                    <span class="badge status-badge ${statusClass}">${statusText} ${statusCode}</span>
-                </div>
-                <p class="card-text small text-muted mb-2">
-                    <a href="${site.url}" target="_blank" rel="noopener">${escapeHtml(site.url)}</a>
-                </p>
-                <div class="small mb-2">
-                    <div><i class="bi bi-clock"></i> ${checked}</div>
-                    <div class="response-time"><i class="bi bi-speedometer"></i> ${rt}</div>
-                    ${site.last_error ? `<div class="text-danger"><i class="bi bi-exclamation-triangle"></i> ${escapeHtml(site.last_error)}</div>` : ""}
-                </div>
-                <div class="form-check form-switch mb-2">
-                    <input class="form-check-input" type="checkbox" id="active-${site.id}" 
-                           ${site.is_active ? "checked" : ""} 
-                           onchange="toggleSite(${site.id})">
-                    <label class="form-check-label small" for="active-${site.id}">
-                        ${site.is_active ? "Мониторинг активен" : "Мониторинг выключен"}
-                    </label>
-                </div>
-                <div class="card-actions d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-primary" onclick="checkNow(${site.id}, this)">
-                        <i class="bi bi-arrow-repeat"></i> Проверить
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete(${site.id})">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
+    <div class="site-item">
+        <div class="status-indicator ${statusClass}" title="${isUp ? 'OK' : (site.last_status ? 'Проблема' : 'Не проверен')}"></div>
+        <div class="site-info">
+            <div class="site-name">${escapeHtml(site.name)}</div>
+            <a class="site-url" href="${site.url}" target="_blank" rel="noopener">${escapeHtml(site.url)}</a>
+            <div class="site-meta">
+                <span><i class="bi bi-clock"></i> ${checked}</span>
+                <span><i class="bi bi-speedometer"></i> ${rt}</span>
+                ${site.last_error ? `<span class="text-danger"><i class="bi bi-exclamation-triangle"></i> ${escapeHtml(site.last_error)}</span>` : ""}
             </div>
+        </div>
+        <div class="site-actions">
+            <span class="status-code ${statusClass}">${statusCode}</span>
+            <div class="form-check form-switch mb-0">
+                <input class="form-check-input" type="checkbox" id="active-${site.id}" 
+                       ${site.is_active ? "checked" : ""} 
+                       onchange="toggleSite(${site.id})"
+                       title="Мониторинг">
+            </div>
+            <button class="btn btn-sm btn-outline-secondary" onclick="checkNow(${site.id}, this)" title="Проверить сейчас">
+                <i class="bi bi-arrow-repeat"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete(${site.id})" title="Удалить">
+                <i class="bi bi-trash"></i>
+            </button>
         </div>
     </div>`;
 }

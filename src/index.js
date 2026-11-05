@@ -92,6 +92,48 @@ async function start() {
   await initDB();
   console.log('База данных готова');
 
+  // Автозаполнение списком сайтов, если база пустая
+  const existing = prepare('SELECT COUNT(*) as cnt FROM sites').get();
+  if (existing && existing.cnt === 0) {
+    const seedSites = [
+      { name: 'Bonnashop', url: 'https://bonnashop.ru/' },
+      { name: 'Monin Masterglass', url: 'https://monin-masterglass.ru/' },
+      { name: 'Status Ivanovo', url: 'https://statusivanovo.ru/' },
+      { name: 'Iva Sorti', url: 'https://ivassorti.ru/' },
+      { name: 'Okna Balkony 37', url: 'https://okna-balkony37.ru/' },
+      { name: 'IvaTex', url: 'https://ivatex.ru/' },
+      { name: 'Best Label', url: 'https://bestlabel.ru/' },
+      { name: 'Prime Label', url: 'https://prime-label.ru/' },
+      { name: 'Create Label', url: 'https://createlabel.ru/' },
+      { name: 'IWT Pro', url: 'https://iwt-pro.ru/' },
+      { name: 'Потолки 37', url: 'https://потолки37.рф/' },
+      { name: 'VIP Party', url: 'https://vip-party.ru/' },
+      { name: 'TR Design', url: 'https://tr-design.ru/' },
+      { name: 'Женский трикотаж', url: 'https://jenskiy-trikotaj.ru/' },
+      { name: 'Гидротех-центр 37', url: 'https://гидротех-центр37.рф/' },
+      { name: 'UM OK 37', url: 'https://um-ok37.ru/' },
+      { name: 'Garant 37', url: 'https://garant-37.ru/' },
+      { name: 'Span Group', url: 'https://spangroup.ru/' },
+      { name: 'Shturman 37', url: 'https://shturman37.ru/' },
+      { name: 'Illuminator 3000', url: 'https://illuminator3000.ru/' },
+      { name: 'Basic Look', url: 'https://basiclook.store/' },
+    ];
+
+    const insert = prepare(`
+      INSERT INTO sites (name, url, expected_status, check_interval, is_active)
+      VALUES (?, ?, 200, 60, 1)
+    `);
+
+    for (const site of seedSites) {
+      try {
+        insert.run(site.name, site.url);
+      } catch (e) {
+        // ignore duplicates
+      }
+    }
+    console.log(`Добавлено ${seedSites.length} сайтов`);
+  }
+
   const interval = parseInt(process.env.DEFAULT_CHECK_INTERVAL || '60');
   setInterval(async () => {
     console.log('Проверка активных сайтов...');
