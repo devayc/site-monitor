@@ -1,0 +1,51 @@
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa;
+}
+
+main {
+    flex: 1;
+}
+
+.site-card {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.site-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.status-badge {
+    font-size: 0.85rem;
+    padding: 0.35em 0.65em;
+}
+
+.status-up {
+    background-color: #198754 !important;
+}
+
+.status-down {
+    background-color: #dc3545 !important;
+}
+
+.status-unknown {
+    background-color: #6c757d !important;
+}
+
+.response-time {
+    font-size: 0.8rem;
+}
+
+.card-actions .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 576px) {
+    .site-card .card-body {
+        padding: 1rem;
+    }
+}
