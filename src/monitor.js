@@ -1,5 +1,5 @@
 const axios = require('axios');
-const db = require('./db');
+const { prepare } = require('./db');
 const { sendStatusNotification } = require('./notifications');
 
 async function checkSite(site) {
@@ -12,7 +12,7 @@ async function checkSite(site) {
     const response = await axios.get(site.url, {
       timeout: 15000,
       maxRedirects: 5,
-      validateStatus: () => true, // принимаем любой статус
+      validateStatus: () => true,
     });
     statusCode = response.status;
     responseTime = Date.now() - start;
@@ -24,7 +24,7 @@ async function checkSite(site) {
   const isUp = statusCode === site.expected_status;
 
   // Обновляем в БД
-  const stmt = db.prepare(`
+  prepare(`
     UPDATE sites SET
       last_status = ?,
       last_response_time = ?,
@@ -32,8 +32,7 @@ async function checkSite(site) {
       last_error = ?,
       updated_at = datetime('now')
     WHERE id = ?
-  `);
-  stmt.run(statusCode, responseTime, error, site.id);
+  `).run(statusCode, responseTime, error, site.id);
 
   // Уведомление при изменении
   if (previousStatus !== null && previousStatus !== statusCode) {
@@ -53,7 +52,7 @@ async function checkSite(site) {
 }
 
 async function checkAllActiveSites() {
-  const sites = db.prepare('SELECT * FROM sites WHERE is_active = 1').all();
+  const sites = prepare('SELECT * FROM sites WHERE is_active = 1').all();
   const results = [];
 
   for (const site of sites) {
