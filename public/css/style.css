@@ -1,11 +1,18 @@
 body {
     min-height: 100vh;
-    background-color: #f5f7fa;
+    background-color: #0f1419;
+    color: #e2e8f0;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 .navbar {
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    background-color: #1a1f2e !important;
+    border-bottom: 1px solid #2d3748;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+.navbar-brand {
+    color: #f1f5f9 !important;
 }
 
 .sites-list {
@@ -15,18 +22,19 @@ body {
 }
 
 .site-item {
-    background: #fff;
+    background: #1a1f2e;
+    border: 1px solid #2d3748;
     border-radius: 12px;
     padding: 14px 18px;
     display: flex;
     align-items: center;
     gap: 16px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-    transition: box-shadow 0.15s ease;
+    transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .site-item:hover {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    background: #1e2536;
+    border-color: #3d4a63;
 }
 
 .status-indicator {
@@ -34,21 +42,21 @@ body {
     height: 14px;
     border-radius: 50%;
     flex-shrink: 0;
-    box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.3);
 }
 
 .status-indicator.up {
-    background: #0d9488;
-    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+    background: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
 }
 
 .status-indicator.down {
-    background: #dc2626;
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+    background: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
 }
 
 .status-indicator.unknown {
-    background: #94a3b8;
+    background: #64748b;
 }
 
 .site-info {
@@ -60,12 +68,12 @@ body {
     font-weight: 600;
     font-size: 1rem;
     margin: 0;
-    color: #1e293b;
+    color: #f1f5f9;
 }
 
 .site-url {
     font-size: 0.85rem;
-    color: #64748b;
+    color: #94a3b8;
     text-decoration: none;
     display: block;
     white-space: nowrap;
@@ -74,13 +82,13 @@ body {
 }
 
 .site-url:hover {
-    color: #2563eb;
+    color: #60a5fa;
     text-decoration: underline;
 }
 
 .site-meta {
     font-size: 0.8rem;
-    color: #64748b;
+    color: #94a3b8;
     display: flex;
     gap: 14px;
     margin-top: 2px;
@@ -98,22 +106,107 @@ body {
     font-weight: 600;
     padding: 2px 8px;
     border-radius: 6px;
-    background: #f1f5f9;
-    color: #334155;
+    background: #2d3748;
+    color: #cbd5e1;
 }
 
 .status-code.up {
-    background: #d1fae5;
-    color: #065f46;
+    background: #064e3b;
+    color: #6ee7b7;
 }
 
 .status-code.down {
-    background: #fee2e2;
-    color: #991b1b;
+    background: #7f1d1d;
+    color: #fca5a5;
 }
 
 .form-check-input {
     cursor: pointer;
+    background-color: #334155;
+    border-color: #475569;
+}
+
+.form-check-input:checked {
+    background-color: #10b981;
+    border-color: #10b981;
+}
+
+.btn-outline-secondary {
+    color: #94a3b8;
+    border-color: #475569;
+}
+
+.btn-outline-secondary:hover {
+    background: #334155;
+    color: #e2e8f0;
+    border-color: #64748b;
+}
+
+.btn-outline-danger {
+    color: #f87171;
+    border-color: #7f1d1d;
+}
+
+.btn-outline-danger:hover {
+    background: #7f1d1d;
+    color: #fff;
+}
+
+.text-muted {
+    color: #94a3b8 !important;
+}
+
+.text-danger {
+    color: #f87171 !important;
+}
+
+.alert-danger {
+    background: #7f1d1d;
+    border-color: #991b1b;
+    color: #fecaca;
+}
+
+.form-control, .form-select {
+    background-color: #1a1f2e;
+    border-color: #2d3748;
+    color: #e2e8f0;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: #1e2536;
+    border-color: #3b82f6;
+    color: #f1f5f9;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+}
+
+.form-control::placeholder {
+    color: #64748b;
+}
+
+.card {
+    background: #1a1f2e;
+    border-color: #2d3748;
+    color: #e2e8f0;
+}
+
+.card-header {
+    background: #151a26;
+    border-bottom-color: #2d3748;
+    color: #f1f5f9;
+}
+
+.modal-content {
+    background: #1a1f2e;
+    color: #e2e8f0;
+    border-color: #2d3748;
+}
+
+.modal-header, .modal-footer {
+    border-color: #2d3748;
+}
+
+.btn-close {
+    filter: invert(1);
 }
 
 @media (max-width: 768px) {
