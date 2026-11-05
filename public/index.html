@@ -16,8 +16,11 @@
             </a>
             <div class="d-flex align-items-center gap-2">
                 <span class="badge bg-secondary" id="last-update">Загрузка...</span>
-                <button class="btn btn-sm btn-outline-light" onclick="refreshSites()">
+                <button class="btn btn-sm btn-outline-light" onclick="refreshSites()" title="Обновить список">
                     <i class="bi bi-arrow-clockwise"></i>
+                </button>
+                <button class="btn btn-sm btn-warning" onclick="checkAllSites()" id="check-all-btn" title="Проверить все сайты сейчас">
+                    <i class="bi bi-lightning"></i> Проверить все
                 </button>
                 <a href="/add" class="btn btn-sm btn-primary">+ Добавить</a>
             </div>

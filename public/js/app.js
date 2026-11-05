@@ -30,8 +30,9 @@ async function refreshSites() {
 
 function renderSiteItem(site) {
     const isUp = site.is_up === true;
-    const statusClass = site.last_status == null ? "unknown" : (isUp ? "up" : "down");
-    const statusCode = site.last_status ?? "—";
+    const isDown = site.is_up === false;
+    const statusClass = isUp ? "up" : (isDown ? "down" : "unknown");
+    const statusCode = site.last_status ?? (site.last_error ? "ERR" : "—");
     const rt = site.last_response_time ? `${site.last_response_time} мс` : "—";
     const checked = site.last_checked 
         ? new Date(site.last_checked).toLocaleString("ru-RU") 
@@ -39,7 +40,7 @@ function renderSiteItem(site) {
 
     return `
     <div class="site-item">
-        <div class="status-indicator ${statusClass}" title="${isUp ? 'OK' : (site.last_status ? 'Проблема' : 'Не проверен')}"></div>
+        <div class="status-indicator ${statusClass}" title="${isUp ? 'OK' : (isDown ? 'Недоступен' : 'Не проверен')}"></div>
         <div class="site-info">
             <div class="site-name">${escapeHtml(site.name)}</div>
             <a class="site-url" href="${site.url}" target="_blank" rel="noopener">${escapeHtml(site.url)}</a>
@@ -81,6 +82,24 @@ async function toggleSite(id) {
     } catch (e) {
         alert("Не удалось изменить статус");
         refreshSites();
+    }
+}
+
+async function checkAllSites() {
+    const btn = document.getElementById("check-all-btn");
+    if (!btn) return;
+    btn.disabled = true;
+    const original = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Проверяю...';
+
+    try {
+        await fetch("/api/sites/check-all", { method: "POST" });
+        await refreshSites();
+    } catch (e) {
+        alert("Ошибка при проверке всех сайтов");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = original;
     }
 }
 

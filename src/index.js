@@ -17,11 +17,24 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.get('/api/sites', (req, res) => {
   const sites = prepare('SELECT * FROM sites ORDER BY name').all();
   res.json(
-    sites.map((s) => ({
-      ...s,
-      is_active: !!s.is_active,
-      is_up: s.last_status === s.expected_status ? true : s.last_status == null ? null : false,
-    }))
+    sites.map((s) => {
+      const hasError = !!s.last_error;
+      const statusOk = s.last_status === s.expected_status;
+      // Если был статус и он совпал — UP
+      // Если статус null, но есть ошибка (timeout/TLS и т.п.) — DOWN
+      // Если ещё не проверяли — null (серый)
+      let is_up = null;
+      if (s.last_status != null) {
+        is_up = statusOk;
+      } else if (hasError) {
+        is_up = false;
+      }
+      return {
+        ...s,
+        is_active: !!s.is_active,
+        is_up,
+      };
+    })
   );
 });
 
@@ -64,6 +77,15 @@ app.delete('/api/sites/:id', (req, res) => {
   const result = prepare('DELETE FROM sites WHERE id = ?').run(req.params.id);
   if (result.changes === 0) return res.status(404).json({ detail: 'Сайт не найден' });
   res.json({ message: 'Сайт удалён' });
+});
+
+app.post('/api/sites/check-all', async (req, res) => {
+  try {
+    const results = await checkAllActiveSites();
+    res.json({ checked: results.length, results });
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
 });
 
 app.post('/api/sites/:id/check', async (req, res) => {
