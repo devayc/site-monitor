@@ -61,6 +61,9 @@ function renderSiteItem(site) {
             <button class="btn btn-sm btn-outline-secondary" onclick="checkNow(${site.id}, this)" title="Проверить сейчас">
                 <i class="bi bi-arrow-repeat"></i>
             </button>
+            <button class="btn btn-sm btn-outline-primary" onclick="openEdit(${site.id})" title="Редактировать">
+                <i class="bi bi-pencil"></i>
+            </button>
             <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete(${site.id})" title="Удалить">
                 <i class="bi bi-trash"></i>
             </button>
@@ -122,6 +125,53 @@ function confirmDelete(id) {
     deleteSiteId = id;
     new bootstrap.Modal(document.getElementById("deleteModal")).show();
 }
+
+async function openEdit(id) {
+    try {
+        const res = await fetch("/api/sites");
+        const sites = await res.json();
+        const site = sites.find(s => s.id === id);
+        if (!site) return alert("Сайт не найден");
+
+        document.getElementById("edit-id").value = site.id;
+        document.getElementById("edit-name").value = site.name;
+        document.getElementById("edit-url").value = site.url;
+        document.getElementById("edit-expected").value = site.expected_status || 200;
+        document.getElementById("edit-interval").value = site.check_interval || 60;
+        document.getElementById("edit-emails").value = site.notify_emails || "";
+
+        new bootstrap.Modal(document.getElementById("editModal")).show();
+    } catch (e) {
+        alert("Ошибка загрузки данных");
+    }
+}
+
+document.getElementById("edit-form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = document.getElementById("edit-id").value;
+    const data = {
+        name: document.getElementById("edit-name").value,
+        url: document.getElementById("edit-url").value,
+        expected_status: document.getElementById("edit-expected").value,
+        check_interval: document.getElementById("edit-interval").value,
+        notify_emails: document.getElementById("edit-emails").value,
+    };
+
+    try {
+        const res = await fetch(`/api/sites/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.detail || "Ошибка");
+
+        bootstrap.Modal.getInstance(document.getElementById("editModal")).hide();
+        refreshSites();
+    } catch (err) {
+        alert(err.message);
+    }
+});
 
 document.getElementById("confirmDelete")?.addEventListener("click", async () => {
     if (!deleteSiteId) return;

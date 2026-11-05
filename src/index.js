@@ -20,9 +20,6 @@ app.get('/api/sites', (req, res) => {
     sites.map((s) => {
       const hasError = !!s.last_error;
       const statusOk = s.last_status === s.expected_status;
-      // Если был статус и он совпал — UP
-      // Если статус null, но есть ошибка (timeout/TLS и т.п.) — DOWN
-      // Если ещё не проверяли — null (серый)
       let is_up = null;
       if (s.last_status != null) {
         is_up = statusOk;
@@ -52,6 +49,44 @@ app.post('/api/sites', (req, res) => {
     `).run(name, url, Number(expected_status), Number(check_interval), notify_emails || null);
 
     res.json({ id: result.lastInsertRowid, message: 'Сайт добавлен' });
+  } catch (err) {
+    if (err.message && err.message.includes('UNIQUE')) {
+      return res.status(400).json({ detail: 'Сайт с таким URL уже существует' });
+    }
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+app.patch('/api/sites/:id', (req, res) => {
+  const site = prepare('SELECT * FROM sites WHERE id = ?').get(req.params.id);
+  if (!site) return res.status(404).json({ detail: 'Сайт не найден' });
+
+  const { name, url, expected_status, check_interval, notify_emails } = req.body;
+
+  if (!name || !url) {
+    return res.status(400).json({ detail: 'Название и URL обязательны' });
+  }
+
+  try {
+    prepare(`
+      UPDATE sites SET
+        name = ?,
+        url = ?,
+        expected_status = ?,
+        check_interval = ?,
+        notify_emails = ?,
+        updated_at = datetime('now')
+      WHERE id = ?
+    `).run(
+      name,
+      url,
+      Number(expected_status) || 200,
+      Number(check_interval) || 60,
+      notify_emails || null,
+      req.params.id
+    );
+
+    res.json({ message: 'Сайт обновлён' });
   } catch (err) {
     if (err.message && err.message.includes('UNIQUE')) {
       return res.status(400).json({ detail: 'Сайт с таким URL уже существует' });
